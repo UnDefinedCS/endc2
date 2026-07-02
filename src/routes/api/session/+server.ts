@@ -1,7 +1,7 @@
 import { usersTable, sessions } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { json, error, isRedirect, redirect } from '@sveltejs/kit';
+import { json, isRedirect, redirect } from '@sveltejs/kit';
 import { GetOutput } from '$lib/server/connection.js';
 
 export const GET = async ({ cookies }) => {
@@ -20,9 +20,13 @@ export const GET = async ({ cookies }) => {
 
     return json({
       output: GetOutput()
+    }, {
+        headers: {
+        'Cache-Control': 'no-store'
+      }
     });
   } catch (e) {
     if (isRedirect(e)) throw e;
-    throw error(400, 'Invalid JSON body');
+    throw json({ error: "Error Occurred" });
   }
 };

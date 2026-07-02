@@ -17,7 +17,7 @@ export const sessions = sqliteTable("sessions", {
 
 export const devices = sqliteTable("devices", {
     id:       int().primaryKey({ autoIncrement: true }),
-    sid:      text().notNull(),
+    sid:      text().notNull().unique(),
     username: text().notNull(),
     hostname: text().notNull(),
     model:    text().notNull(),

