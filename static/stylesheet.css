@@ -1,0 +1,187 @@
+/**
+* @description - Main Pwn Panel Styling
+**/
+
+:global(body.no-scroll) {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.terminal {
+    display: flex;
+    flex-direction: column;
+}
+
+.stdout-area {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    /* let .stdout handle the scroll */
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.stdout {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    /* vertical scroll only */
+    overflow-x: hidden;
+    /* no horizontal scroll */
+    padding: 10px;
+    margin: 0;
+    /* pre has default browser margin — kill it */
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #d4d4d4;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    /* preserves whitespace but wraps at container edge */
+    word-break: break-all;
+    /* breaks long lines (e.g. base64, paths) that would overflow */
+    box-sizing: border-box;
+}
+
+.stdin {
+    flex-shrink: 0;
+    width: calc(100% - 20px);
+    box-sizing: border-box;
+    margin: 0 10px 10px;
+    padding: 8px 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #d4d4d4;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.stdin-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 5;
+    /* below the divider, so the divider always wins in the overlap region */
+}
+
+.stdin:focus {
+    border-color: rgba(66, 133, 244, 0.6);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.stdin::placeholder {
+    color: #ffffff;
+}
+
+li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #444;
+}
+
+small {
+    color: #888;
+}
+
+code {
+    font-family: monospace;
+}
+
+/**
+* @description - SplitPane Styling
+**/
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.904);
+    color: #ccc;
+}
+
+.pane {
+    overflow: auto;
+    flex-shrink: 0;
+}
+
+.divider {
+    position: relative;
+    z-index: 20;
+    /* give the divider its own positioned stacking context, above the fixed input */
+    height: 6px;
+    cursor: ns-resize;
+    flex-shrink: 0;
+    border-top: 0.5px solid var(--border, #ddd);
+    border-bottom: 0.5px solid var(--border, #ddd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    background-color: #dddddd6c;
+}
+
+.divider:hover {
+    background: #e8f0fe;
+}
+
+.divider-dots {
+    display: flex;
+    gap: 3px;
+    pointer-events: none;
+}
+
+.divider-dots span {
+    display: block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #ccc;
+}
+
+.divider:hover .divider-dots span {
+    background: #4285f4;
+}
+
+.bottom-pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.controls {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px;
+    border-bottom: 0.5px solid var(--border, #ddd);
+    flex-shrink: 0;
+    background-color: #354b6d4b;
+    z-index: 10;
+}
+
+.controls button {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 0.5px solid #ccc;
+    cursor: pointer;
+}
+
+.controls button:hover {
+    background: #f0f0f0;
+}
+
+.bottom-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}

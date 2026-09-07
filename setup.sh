@@ -2,7 +2,7 @@
 
 # collect needed config information
 read -rs -p "Enter Admin Passphrase: " password
-read -r -p "Enter Location to store sqlite file: " db_path
+read -r -p "Enter Location to store sqlite file (ex. mydb.db): " db_path
 
 # save config to .env file
 echo -e "DB_FILE_NAME='$db_path'\n" > .env
@@ -20,4 +20,4 @@ key_pem="$(pwd)/server-key.pem"
 cert_pem="$(pwd)/server-cert.pem"
 
 # build and run
-npx drizzle-kit push && npm run dev
+npm install . && npx drizzle-kit generate && npx drizzle-kit migrate && npm run dev

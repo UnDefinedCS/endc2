@@ -24,5 +24,7 @@ vite.config.ts.timestamp-*
 
 .npmrc
 .vscode/
+*.sqlite3
+*.sqlite
 *.db
 *.pem
