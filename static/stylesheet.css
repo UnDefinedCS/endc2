@@ -1,4 +1,48 @@
 /**
+* @description - Theme Variables
+**/
+
+[data-bs-theme="dark"] {
+    --pwn-bg: rgba(25, 25, 25, 1);
+    --pwn-text: #ccc;
+    --pwn-text-muted: #888;
+    --pwn-surface: rgba(255, 255, 255, 0.05);
+    --pwn-surface-hover: rgba(255, 255, 255, 0.08);
+    --pwn-border: rgba(255, 255, 255, 0.1);
+    --pwn-border-strong: #444;
+    --pwn-input-text: #d4d4d4;
+    --pwn-placeholder: #ffffff;
+    --pwn-divider-bg: #dddddd6c;
+    --pwn-divider-bg-hover: #e8f0fe;
+    --pwn-divider-dot: #ccc;
+    --pwn-divider-dot-hover: #4285f4;
+    --pwn-controls-bg: #354b6d4b;
+    --pwn-button-border: #ccc;
+    --pwn-button-hover: #f0f0f0;
+    --pwn-focus-ring: rgba(66, 133, 244, 0.6);
+}
+
+[data-bs-theme="light"] {
+    --pwn-bg: #e2e2e2;
+    --pwn-text: #212529;
+    --pwn-text-muted: #6c757d;
+    --pwn-surface: rgba(0, 0, 0, 0.03);
+    --pwn-surface-hover: rgba(0, 0, 0, 0.06);
+    --pwn-border: rgba(0, 0, 0, 0.15);
+    --pwn-border-strong: #ccc;
+    --pwn-input-text: #212529;
+    --pwn-placeholder: #6c757d;
+    --pwn-divider-bg: #00000014;
+    --pwn-divider-bg-hover: #e8f0fe;
+    --pwn-divider-dot: #666;
+    --pwn-divider-dot-hover: #4285f4;
+    --pwn-controls-bg: #e9ecef;
+    --pwn-button-border: #999;
+    --pwn-button-hover: #f0f0f0;
+    --pwn-focus-ring: rgba(66, 133, 244, 0.6);
+}
+
+/**
 * @description - Main Pwn Panel Styling
 **/
 
@@ -7,6 +51,13 @@
     padding: 0;
     height: 100%;
     overflow: hidden;
+}
+
+html, main {
+    background-color: var(--pwn-bg);
+    margin: 0;
+    padding: 0;
+    height: 100%;
 }
 
 .terminal {
@@ -34,9 +85,9 @@
     padding: 10px;
     margin: 0;
     /* pre has default browser margin — kill it */
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #d4d4d4;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--pwn-surface);
+    color: var(--pwn-input-text);
+    border: 1px solid var(--pwn-border);
     border-radius: 4px;
     font-family: 'Courier New', monospace;
     font-size: 13px;
@@ -53,9 +104,9 @@
     box-sizing: border-box;
     margin: 0 10px 10px;
     padding: 8px 12px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #d4d4d4;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--pwn-surface);
+    color: var(--pwn-input-text);
+    border: 1px solid var(--pwn-border);
     border-radius: 4px;
     font-family: 'Courier New', monospace;
     font-size: 13px;
@@ -73,21 +124,21 @@
 }
 
 .stdin:focus {
-    border-color: rgba(66, 133, 244, 0.6);
-    background-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--pwn-focus-ring);
+    background-color: var(--pwn-surface-hover);
 }
 
 .stdin::placeholder {
-    color: #ffffff;
+    color: var(--pwn-placeholder);
 }
 
 li {
     padding: 0.5rem 0;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--pwn-border-strong);
 }
 
 small {
-    color: #888;
+    color: var(--pwn-text-muted);
 }
 
 code {
@@ -103,8 +154,8 @@ code {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.904);
-    color: #ccc;
+    background-color: var(--pwn-bg);
+    color: var(--pwn-text);
 }
 
 .pane {
@@ -119,17 +170,17 @@ code {
     height: 6px;
     cursor: ns-resize;
     flex-shrink: 0;
-    border-top: 0.5px solid var(--border, #ddd);
-    border-bottom: 0.5px solid var(--border, #ddd);
+    border-top: 0.5px solid var(--pwn-border);
+    border-bottom: 0.5px solid var(--pwn-border);
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
-    background-color: #dddddd6c;
+    background-color: var(--pwn-divider-bg);
 }
 
 .divider:hover {
-    background: #e8f0fe;
+    background: var(--pwn-divider-bg-hover);
 }
 
 .divider-dots {
@@ -143,11 +194,11 @@ code {
     width: 3px;
     height: 3px;
     border-radius: 50%;
-    background: #ccc;
+    background: var(--pwn-divider-dot);
 }
 
 .divider:hover .divider-dots span {
-    background: #4285f4;
+    background: var(--pwn-divider-dot-hover);
 }
 
 .bottom-pane {
@@ -160,9 +211,9 @@ code {
     display: flex;
     gap: 6px;
     padding: 8px 12px;
-    border-bottom: 0.5px solid var(--border, #ddd);
+    border-bottom: 0.5px solid var(--pwn-border);
     flex-shrink: 0;
-    background-color: #354b6d4b;
+    background-color: var(--pwn-controls-bg);
     z-index: 10;
 }
 
@@ -170,12 +221,14 @@ code {
     font-size: 12px;
     padding: 3px 10px;
     border-radius: 6px;
-    border: 0.5px solid #ccc;
+    border: 0.5px solid var(--pwn-button-border);
     cursor: pointer;
+    color: var(--pwn-text);
+    background-color: transparent;
 }
 
 .controls button:hover {
-    background: #f0f0f0;
+    background: var(--pwn-button-hover);
 }
 
 .bottom-content {
