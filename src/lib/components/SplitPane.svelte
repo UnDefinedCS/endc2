@@ -22,9 +22,9 @@
         return app.clientHeight - DIVIDER_H;
     }
 
-    function setTopPct(pct: number) {
+    function setTopPct(pct: number, offset: number = 0) {
         pct = Math.max(0, Math.min(100, pct));
-        const topPx = Math.round((pct / 100) * totalH());
+        const topPx = offset + Math.round((pct / 100) * totalH());
         const botPx = totalH() - topPx;
         top.style.height = `${topPx}px`;
         bottom.style.height = `${botPx}px`;
@@ -84,8 +84,8 @@
     <div class="pane bottom-pane" bind:this={bottom}>
         <div class="controls">
             <button onclick={() => setTopPct(50)}>half</button>
-            <button onclick={() => setTopPct(0)}>expand bottom</button>
-            <button onclick={() => setTopPct(75)}>collapse bottom</button>
+            <button onclick={() => setTopPct(0, 75)}>expand bottom</button>
+            <button onclick={() => setTopPct(100, -50)}>collapse bottom</button>
         </div>
         <div id="bottom-pane" class="bottom-content">
             {@render bottomContent()}

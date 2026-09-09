@@ -152,7 +152,7 @@ code {
 .app {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: calc(100vh - 60px);
     overflow: hidden;
     background-color: var(--pwn-bg);
     color: var(--pwn-text);
@@ -215,6 +215,7 @@ code {
     flex-shrink: 0;
     background-color: var(--pwn-controls-bg);
     z-index: 10;
+    height: 44px;
 }
 
 .controls button {
