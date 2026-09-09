@@ -18,7 +18,7 @@
     --pwn-divider-dot-hover: #4285f4;
     --pwn-controls-bg: #354b6d4b;
     --pwn-button-border: #ccc;
-    --pwn-button-hover: #f0f0f0;
+    --pwn-button-hover: #5c5e61;
     --pwn-focus-ring: rgba(66, 133, 244, 0.6);
 }
 
@@ -38,7 +38,7 @@
     --pwn-divider-dot-hover: #4285f4;
     --pwn-controls-bg: #e9ecef;
     --pwn-button-border: #999;
-    --pwn-button-hover: #f0f0f0;
+    --pwn-button-hover: #dadce1;
     --pwn-focus-ring: rgba(66, 133, 244, 0.6);
 }
 
